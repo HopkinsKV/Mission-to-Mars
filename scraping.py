@@ -1,15 +1,36 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# ## Imports and setup
-# Import Splinter and BeautifulSoup
+# ## Imports 
 from splinter import Browser
 from bs4 import BeautifulSoup as soup
 from webdriver_manager.chrome import ChromeDriverManager
 import pandas as pd
+import datetime as dt
 
-executable_path = {'executable_path': ChromeDriverManager().install()}
-browser = Browser('chrome', **executable_path, headless=False)
+
+
+# ## initialize broswer, create data dict, end webdriver and return data 
+def scrape_all():
+    # Initiate headless driver for deployment
+    executable_path = {'executable_path': ChromeDriverManager().install()}
+    browser = Browser('chrome', **executable_path, headless=True)
+
+    news_title, news_paragraph = mars_news(browser)
+
+    # Run all scraping functions and store results in a dictionary
+    data = {
+        "news_title": news_title,
+        "news_paragraph": news_paragraph,
+        "featured_image": featured_image(browser),
+        "facts": mars_facts(),
+        "last_modified": dt.datetime.now()
+    }
+
+    # Stop webdriver and return data
+    browser.quit()
+    return data
+
 
 # ## Article Data - Now as a function. Original in Mission-to-Mars.ipynb
 def mars_news(browser):
@@ -82,4 +103,6 @@ def mars_facts():
     # Convert dataframe into HTML format, add bootstrap
     return df.to_html()
 
-browser.quit()
+if __name__ == "__main__":
+    # If running as script, print scraped data
+    print(scrape_all())
